@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalai — Product & Visual Designer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        body { background-color: #0b0b0c; color: #f3f4f6; overflow-x: hidden; position: relative; }
+
+        /* Subtle Interactive Mouse Glow Background */
+        #mouse-glow {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            background: radial-gradient(600px circle at var(--x) var(--y), rgba(59, 130, 246, 0.07), transparent 80%);
+            z-index: 1;
+        }
+
+        .glass-nav {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 30px; background: rgba(18, 18, 20, 0.85); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 50px; z-index: 100;
+        }
+
+        .logo { font-weight: 700; font-size: 1.1rem; letter-spacing: 1px; color: #fff; }
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
+        .nav-links a:hover { color: #fff; }
+        .cta-btn { background: #3b82f6; color: #fff !important; padding: 8px 18px; border-radius: 20px; font-weight: 500; }
+
+        .hero { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 20px; z-index: 2; position: relative; }
+        .hero-content { max-width: 800px; }
+        .badge { background: rgba(59, 130, 246, 0.12); color: #60a5fa; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-block; margin-bottom: 20px; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .hero h1 { font-size: 3.2rem; font-weight: 700; line-height: 1.2; margin-bottom: 20px; color: #fff; }
+        .hero p { color: #9ca3af; font-size: 1.1rem; margin-bottom: 30px; line-height: 1.6; }
+
+        .hero-cta { display: flex; gap: 15px; justify-content: center; }
+        .btn { padding: 12px 26px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: 0.3s; cursor: pointer; border: none; }
+        .btn.primary { background: #fff; color: #0b0b0c; }
+        .btn.primary:hover { background: #e5e7eb; }
+        .btn.secondary { background: rgba(255, 255, 255, 0.04); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn.secondary:hover { background: rgba(255, 255, 255, 0.08); }
+
+        .section { padding: 90px 10%; position: relative; z-index: 2; }
+        .section h2 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 700; color: #fff; }
+        .section-sub { color: #9ca3af; font-size: 1rem; margin-bottom: 40px; }
+        
+        .bento-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+        .bento-card { background: rgba(18, 18, 20, 0.6); border: 1px solid rgba(255, 255, 255, 0.06); padding: 32px; border-radius: 20px; transition: all 0.3s ease; backdrop-filter: blur(8px); cursor: pointer; }
+        .bento-card:hover { transform: translateY(-5px); border-color: rgba(59, 130, 246, 0.5); background: rgba(24, 24, 27, 0.8); }
+        .bento-card h3 { font-size: 1.25rem; color: #fff; margin-bottom: 10px; }
+        .bento-card p { color: #9ca3af; font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; }
+        .card-tag { display: inline-block; background: rgba(59, 130, 246, 0.1); color: #60a5fa; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Gallery Table Style */
+        .gallery-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: rgba(18, 18, 20, 0.5); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.06); }
+        .gallery-table th, .gallery-table td { padding: 18px 24px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.06); font-size: 0.95rem; }
+        .gallery-table th { background: rgba(24, 24, 27, 0.8); color: #fff; font-weight: 600; }
+        .gallery-table td { color: #9ca3af; }
+        .gallery-table td:first-child { color: #fff; font-weight: 500; }
+
+        /* Modal Popup for Case Studies */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background: #121214; border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto;
+            padding: 40px; border-radius: 24px; position: relative; transform: scale(0.95); transition: 0.3s ease;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-close {
+            position: absolute; top: 20px; right: 25px; background: rgba(255, 255, 255, 0.08);
+            border: none; color: #fff; width: 36px; height: 36px; border-radius: 50%;
+            font-size: 1.2rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { background: rgba(255, 255, 255, 0.2); }
+        .modal-content h2 { color: #fff; font-size: 1.8rem; margin-bottom: 15px; }
+        .modal-content h4 { color: #60a5fa; margin: 20px 0 8px 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .modal-content p { color: #9ca3af; line-height: 1.6; font-size: 0.95rem; margin-bottom: 10px; }
+
+        footer { text-align: center; padding: 60px 20px; color: #6b7280; font-size: 0.9rem; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+
+        @media(max-width: 768px) {
+            .hero h1 { font-size: 2.3rem; }
+            .glass-nav { width: 95%; padding: 12px 20px; }
+            .nav-links { display: none; }
+            .modal-content { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mouse Glow Effect -->
+    <div id="mouse-glow"></div>
+
+    <!-- Navigation -->
+    <nav class="glass-nav">
+        <div class="logo">KALAI</div>
+        <div class="nav-links">
+            <a href="#work">UI/UX</a>
+            <a href="#graphics">Graphic Design</a>
+            <a href="#logos">Logo Design</a>
+            <a href="#apparel">T-Shirt Design</a>
+        </div>
+        <a href="https://docs.google.com/document/d/1NSwIXqZOAzpURNVU1wyH1Ac6S4f0Frv8Y2pG7R0Hp1s/edit" target="_blank" class="cta-btn">View Doc</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="badge">● Available for Full-Time Roles</span>
+            <h1>Designing Intuitive Digital Experiences & Bold Visual Identities.</h1>
+            <p>Hi, I’m Kalai — a multidisciplinary designer crafting UI/UX systems, brand identities, and high-impact visual designs.</p>
+            <div class="hero-cta">
+                <a href="#work" class="btn primary">Explore Works</a>
+                <a href="https://docs.google.com/document/d/1NSwIXqZOAzpURNVU1wyH1Ac6S4f0Frv8Y2pG7R0Hp1s/edit" target="_blank" class="btn secondary">Google Doc Copy</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- UI/UX Section -->
+    <section id="work" class="section">
+        <h2>UI/UX Design Case Studies</h2>
+        <p class="section-sub">Click any project card to view the complete case study breakdown.</p>
+        <div class="bento-grid">
+            <div class="bento-card" onclick="openModal('metaPlanet')">
+                <span class="card-tag">Web3 / 3D Space</span>
+                <h3>01. Meta Planet</h3>
+                <p>3D Interactive Space Exploration landing page with minimal HUD telemetry cards and planetary telemetry data.</p>
+                <span style="color: #60a5fa; font-size: 0.9rem; font-weight: 600;">Read Case Study →</span>
+            </div>
+            <div class="bento-card" onclick="openModal('saasDash')">
+                <span class="card-tag">Fintech SaaS</span>
+                <h3>02. SaaS Analytics & Fintech</h3>
+                <p>Data-dense financial command center structured into modular, scannable KPI cards for real-time tracking.</p>
+                <span style="color: #60a5fa; font-size: 0.9rem; font-weight: 600;">Read Case Study →</span>
+            </div>
+            <div class="bento-card" onclick="openModal('aiWorkflow')">
+                <span class="card-tag">AI / Dev Tools</span>
+                <h3>03. AI Workflow Platform</h3>
+                <p>No-code canvas design tool enabling product teams to build and orchestrate multi-agent AI workflows seamlessly.</p>
+                <span style="color: #60a5fa; font-size: 0.9rem; font-weight: 600;">Read Case Study →</span>
+            </div>
+            <div class="bento-card" onclick="openModal('locoApp')">
+                <span class="card-tag">Mobile Transit</span>
+                <h3>04. LOCO Mobile App</h3>
+                <p>Urban mobility and transit app featuring single-tap unlocks and live low-bandwidth vector fleet maps.</p>
+                <span style="color: #60a5fa; font-size: 0.9rem; font-weight: 600;">Read Case Study →</span>
+            </div>
+            <div class="bento-card" onclick="openModal('otpFlow')">
+                <span class="card-tag">Mobile Security</span>
+                <h3>05. Mobile OTP & Onboarding</h3>
+                <p>High-converting mobile authentication flow with smart SMS auto-fill and haptic feedback error states.</p>
+                <span style="color: #60a5fa; font-size: 0.9rem; font-weight: 600;">Read Case Study →</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Graphic Design Section -->
+    <section id="graphics" class="section">
+        <h2>Graphic Design Gallery</h2>
+        <p class="section-sub">A curated visual showcase of editorial automotive posters, luxury social media campaigns, and brand creatives.</p>
+        <table class="gallery-table">
+            <tr>
+                <th>Project / Subject</th>
+                <th>Category</th>
+                <th>Design Focus</th>
+            </tr>
+            <tr>
+                <td>Ferrari F40</td>
+                <td>Editorial Poster</td>
+                <td>High-contrast vector artwork with bold typography and vintage racing aesthetic.</td>
+            </tr>
+            <tr>
+                <td>Porsche GT3 RS</td>
+                <td>Automotive Poster</td>
+                <td>Dynamic motion-blur composition highlighting track performance and aerodynamics.</td>
+            </tr>
+            <tr>
+                <td>Free Fire</td>
+                <td>Gaming Art</td>
+                <td>Vibrant, high-energy promotional visual with custom text effects and character lighting.</td>
+            </tr>
+            <tr>
+                <td>Classic Era Jewellery</td>
+                <td>Social Media Design</td>
+                <td>Minimalist luxury layout emphasizing warm golden tones and serif typography.</td>
+            </tr>
+            <tr>
+                <td>Evolabs Research Snap-8</td>
+                <td>Social Media Design</td>
+                <td>Clean clinical-cosmetic visual hierarchy highlighting active ingredient callouts.</td>
+            </tr>
+            <tr>
+                <td>Slimba High-Protein Bar</td>
+                <td>Promotional Visual</td>
+                <td>Bold color-blocked campaign focusing on macro nutrition values and appetite appeal.</td>
+            </tr>
+        </table>
+    </section>
+
+    <!-- Logo Design Section -->
+    <section id="logos" class="section">
+        <h2>Logo Design Showcase</h2>
+        <p class="section-sub">Distinctive brand marks and monograms engineered for scalability and lasting recall.</p>
+        <div class="bento-grid">
+            <div class="bento-card">
+                <span class="card-tag">Healthcare Brand</span>
+                <h3>Koen — Medical Coding Institute</h3>
+                <p>Corporate identity combining institutional credibility with modern geometric letterforms for healthcare education.</p>
+            </div>
+            <div class="bento-card">
+                <span class="card-tag">Sustainable Identity</span>
+                <h3>Eco Plate — Sustainable Tableware</h3>
+                <p>Organic nature-inspired mark symbolizing sustainability, circular economy, and raw plant-based materials.</p>
+            </div>
+            <div class="bento-card">
+                <span class="card-tag">Crypto & Tech</span>
+                <h3>DCX — Tech & Digital Monogram</h3>
+                <p>High-contrast geometric monogram built with balanced negative space for dark-mode interfaces.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- T-Shirt Design Section -->
+    <section id="apparel" class="section">
+        <h2>T-Shirt Design Showcase</h2>
+        <p class="section-sub">Custom streetwear graphics, technical apparel prints, and Tamil cultural motif concepts.</p>
+        <div class="bento-grid">
+            <div class="bento-card">
+                <span class="card-tag">Streetwear</span>
+                <h3>Cybernetic Cyberpunk Series</h3>
+                <p>Heavy graphic back-print designed for 5-color screen printing on oversized boxy fit tees.</p>
+            </div>
+            <div class="bento-card">
+                <span class="card-tag">Minimalist Apparel</span>
+                <h3>Minimalist Typographic Tees</h3>
+                <p>Swiss international style and architectural quotes with high-density rubberized front prints.</p>
+            </div>
+            <div class="bento-card">
+                <span class="card-tag">Vintage Motors</span>
+                <h3>Retro Industrial Motors</h3>
+                <p>Vintage automotive distressed graphics optimized for DTG soft-hand ink on acid-wash garments.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 Kalai. Designed with precision & minimalism.</p>
+    </footer>
+
+    <!-- Modal Popup Structure -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal-content" id="modalContent">
+            <button class="modal-close" onclick="closeModalDirect()">×</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Mouse Glow Effect
+        const glow = document.getElementById('mouse-glow');
+        document.addEventListener('mousemove', (e) => {
+            glow.style.setProperty('--x', e.clientX + 'px');
+            glow.style.setProperty('--y', e.clientY + 'px');
+        });
+
+        // Case Studies Data for Modal
+        const caseStudies = {
+            metaPlanet: {
+                title: "Meta Planet — 3D Interactive Space Exploration",
+                tag: "Web3 / 3D Spatial Design",
+                overview: "An immersive space-exploration landing page allowing users to browse galaxies, the solar system, and fictional exoplanets.",
+                challenge: "Astronomical data often feels dense and text-heavy, reducing user engagement on educational or sci-fi platforms.",
+                solution: "Combined spatial 3D planetary renders with minimal HUD-style telemetry cards, allowing users to scan planetary metrics effortlessly."
+            },
+            saasDash: {
+                title: "SaaS Analytics & Fintech Dashboards",
+                tag: "B2B SaaS / Enterprise Fintech",
+                overview: "Dual dashboard concepts built for real-time web traffic analytics and personal wealth tracking.",
+                challenge: "Data-dense dashboards overwhelm users when metrics, charts, and account actions compete for visual attention.",
+                solution: "Structured complex KPIs into modular, scannable cards with clear time-range filters and smooth interactive panel transitions."
+            },
+            aiWorkflow: {
+                title: "AI Workflow Platform — SaaS Landing Page",
+                tag: "Product Landing Page / AI",
+                overview: "A high-converting product landing page designed to communicate workflow automation value within seconds.",
+                challenge: "New AI SaaS tools struggle to build immediate trust and convert first-time visitors into waitlist signups.",
+                solution: "Established a bold visual hierarchy pairing a clear value proposition, live integration announcements, and high-contrast CTAs."
+            },
+            locoApp: {
+                title: "LOCO — Animated Web Authentication",
+                tag: "Web Onboarding & UI Animation",
+                overview: "An interactive Login and Registration modal experience built for seamless user verification.",
+                challenge: "Static, multi-page authentication forms create unnecessary friction and higher user drop-off during signup.",
+                solution: "Designed a seamless single-screen modal transition that smoothly animates between Login and Registration states."
+            },
+            otpFlow: {
+                title: "Mobile App Onboarding & OTP Flow",
+                tag: "Mobile UI/UX / iOS & Android",
+                overview: "An end-to-end mobile authentication flow covering Login, Sign Up, and 4-Digit OTP Verification.",
+                challenge: "Cumbersome mobile sign-in steps and unclear OTP feedback lead to user frustration during account setup.",
+                solution: "Streamlined access with one-tap social sign-ins and a clear 4-digit OTP screen featuring live resend countdown timers."
+            }
+        };
+
+        function openModal(key) {
+            const data = caseStudies[key];
+            if(!data) return;
+            const body = document.getElementById('modalBody');
+            body.innerHTML = `
+                <span class="card-tag" style="margin-bottom: 12px; display: inline-block;">${data.tag}</span>
+                <h2>${data.title}</h2>
+                <h4>Overview</h4>
+                <p>${data.overview}</p>
+                <h4>The Challenge</h4>
+                <p>${data.challenge}</p>
+                <h4>The Solution</h4>
+                <p>${data.solution}</p>
+            `;
+            document.getElementById('modalOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(e) {
+            if(e.target.id === 'modalOverlay') {
+                document.getElementById('modalOverlay').classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function closeModalDirect() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+</body>
+</html>
